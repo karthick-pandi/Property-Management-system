@@ -10,5 +10,5 @@ export const AppDataSource = new DataSource({
   password: "",
   database: "pms_db",
   synchronize: true,
-  entities: [User],
+  entities: [User] ,
 });
