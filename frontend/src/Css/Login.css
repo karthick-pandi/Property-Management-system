@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════
+   Login.css  —  Styles specific to LoginPage
+   ═══════════════════════════════════════ */
+
+/* Forgot password link */
+.forgot-link {
+  font-size: 0.81rem;
+  color: var(--maroon-main);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  color: var(--maroon-light);
+  text-decoration: underline;
+}
+
+/* Remember me checkbox row */
+.login-remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Login success icon */
+.login-success-icon {
+  font-size: 3rem;
+  color: var(--maroon-main);
+  margin-bottom: 1rem;
+}
+
+/* Loading spinner color override */
+.login-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--maroon-main);
+}
+
+/* Social buttons row */
+.social-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.social-row .social-btn {
+  flex: 1;
+}

@@ -1,6 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { v4 as uuidv4 } from "uuid";
 
-@Entity()
+
+
+@Entity("user")   // ← FIXED
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -8,10 +18,10 @@ export class User {
   @Column({ unique: true })
   userId!: string;
 
-  @Column()
-  name!: string;
+  @Column({ length: 50 })
+  firstName!: string;
 
-  @Column()
+  @Column({ length: 50 })
   lastName!: string;
 
   @Column({ unique: true })
@@ -20,8 +30,20 @@ export class User {
   @Column()
   password!: string;
 
+  @Column({ nullable: true })
+  company!: string;
+
+  @Column()
+  role!: string;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+
   @BeforeInsert()
   generateUserId() {
-    this.userId = "USR_" + Math.floor(100000 + Math.random() * 900000);
+    this.userId = "USR_" + uuidv4();;
   }
 }

@@ -1,26 +1,66 @@
+// Service/Auth.Service.ts
 import { AppDataSource } from "../config/data-source";
 import { User } from "../Entity/User";
-const  hashPassword = require("../Utils/Hash");
+import { SignupDTO, LoginDTO } from "../DTO/Auth.dto";
+
+const hashPassword    = require("../Utils/Hash");
+const comparePassword = require("../Utils/Hash"); // comparePassword export from same file
+
 const userRepo = AppDataSource.getRepository(User);
 
-export const registerUser = async (data: any) => {
-  const { name, lastName, email, password } = data;
+/* ─────────────────────────────────────────
+   SIGNUP
+───────────────────────────────────────── */
+export const registerUser = async (data: SignupDTO) => {
+  console.log("Registering user with data:", data);
+  const { firstName, lastName, email, password, company, role } = data;
 
   // Check existing user
   const existingUser = await userRepo.findOne({ where: { email } });
   if (existingUser) {
-    throw new Error("User already exists");
+    throw new Error("User already exists with this email");
   }
 
   // Hash password
+  console.log("Hashing password...");
   const hashedPassword = await hashPassword(password);
+  console.log("1111111111111111111111111111Hashing password...");
 
   const user = userRepo.create({
-    name,
+    firstName,
     lastName,
     email,
     password: hashedPassword,
+    company:  company ?? "",
+    role,
   });
 
-  return await userRepo.save(user);
+  const savedUser = await userRepo.save(user);
+
+  // Return without password
+  const { password: _, ...userWithoutPassword } = savedUser;
+  return userWithoutPassword;
+};
+
+/* ─────────────────────────────────────────
+   LOGIN
+───────────────────────────────────────── */
+export const loginUser = async (data: LoginDTO) => {
+  const { email, password } = data;
+
+  // Find user
+  const user = await userRepo.findOne({ where: { email } });
+  if (!user) {
+    throw new Error("Invalid email or password");
+  }
+
+  // Compare password
+  const isMatch = await comparePassword.comparePassword(password, user.password);
+  if (!isMatch) {
+    throw new Error("Invalid email or password");
+  }
+
+  // Return without password
+  const { password: _, ...userWithoutPassword } = user;
+  return userWithoutPassword;
 };

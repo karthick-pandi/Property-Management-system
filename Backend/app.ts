@@ -5,7 +5,7 @@ import authRoutes from "./Routes/Auth.route";
 const app = express();
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
+app.use("/api", authRoutes);
 
 AppDataSource.initialize()
   .then(() => {
@@ -15,4 +15,4 @@ AppDataSource.initialize()
       console.log("Server running on port 5000");
     });
   })
-  .catch((err:any) => console.log(err));
+  .catch((err: any) => console.log(err));
