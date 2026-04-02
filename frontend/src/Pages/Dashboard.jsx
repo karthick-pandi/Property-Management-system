@@ -1,5 +1,5 @@
 // Pages/Dashboard.jsx
-import "../Css/global.css";
+import "../Css/Global.css";
 
 const stats = [
   { label: "Total Properties", value: "124",  icon: "bi-building-fill",   type: "maroon"  },

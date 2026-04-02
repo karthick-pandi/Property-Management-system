@@ -1,6 +1,6 @@
 // Pages/LeaveManagement.jsx
 import { useState } from "react";
-import "../Css/global.css";
+import "../Css/Global.css";
 
 const mockLeaves = [
   { id:"LV001", employee:"Ravi Kumar",  type:"Casual",   from:"07 Apr 2025", to:"08 Apr 2025", days:2, reason:"Personal work",  status:"Approved" },

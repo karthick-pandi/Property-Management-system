@@ -1,6 +1,6 @@
 // Pages/TimeReporting.jsx
 import { useState } from "react";
-import "../Css/global.css";
+import "../Css/Global.css";
 
 const employees = ["Ravi Kumar","Priya M","Suresh K","Deepa R","Anand S"];
 const mockTimesheets = [

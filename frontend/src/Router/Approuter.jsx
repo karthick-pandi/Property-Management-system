@@ -10,29 +10,30 @@ import Layout from "../Components/Layout";
 
 // Pages
 import Dashboard    from "../Pages/Dashboard";
-import Customers    from "../Pages/Customers";
-import Properties   from "../Pages/Properties";
+// import Customers    from "../Pages/Customers";
+// import Properties   from "../Pages/Properties";
 import Invoicing    from "../Pages/Invoicing";
-import TimeReporting from "../Pages/TimeReporting";
-import LeaveManagement from "../Pages/LeaveManagement";
+import TimeReporting from "../Pages/Timereporting";
+import LeaveManagement from "../Pages/levaemanagement";
 
-import {
-  LeaseAgreement,
-  LeaseCancellation,
-  RentalAgreement,
-  RentalCancellation,
-  Maintenance,
-  Vendors,
-  PurchaseRequest,
-  QuoteAnalysis,
-  ContractCreation,
-  ContractApproval,
-} from "../Pages/GenericModule";
+import LeaseAgreement    from "../Pages/Leaseagreement ";
+import LeaseCancellation from "../Pages/Leasecancellation ";
+import RentalAgreement   from "../Pages/Rentalagreement ";
+import RentalCancellation from "../Pages/Rentalcancellation";
+import Maintenance       from "../Pages/Maintenance";
+import Vendors           from "../Pages/Vendors";
+import PurchaseRequest   from "../Pages/Purchaserequest";
+import QuoteAnalysis     from "../Pages/Quoteanalysis";
+import ContractCreation  from "../Pages/Contractapproval";
+import ContractApproval  from "../Pages/Contractapproval";
+
+import { useState } from "react";
+import "../Css/Global.css";
 
 /* ── Protected Route ── */
 function ProtectedRoute({ children }) {
   const user = localStorage.getItem("pms_user");
-  return user ? children : <Navigate to="/login" replace />;
+  return !user ? children : <Navigate to="/login" replace />;
 }
 
 /* ── Auth Route (redirect if already logged in) ── */
@@ -67,8 +68,8 @@ export default function AppRouter() {
         <Route path="/dashboard"          element={<Page component={Dashboard}        />} />
 
         {/* Phase 1 */}
-        <Route path="/customers"          element={<Page component={Customers}        />} />
-        <Route path="/properties"         element={<Page component={Properties}       />} />
+        {/* <Route path="/customers"          element={<Page component={Customers}        />} />
+        <Route path="/properties"         element={<Page component={Properties}       />} /> */}
 
         {/* Phase 2 */}
         <Route path="/lease-agreement"    element={<Page component={LeaseAgreement}   />} />
@@ -99,8 +100,7 @@ export default function AppRouter() {
 }
 
 /* ── Auth Shell: renders Login or Signup with switch ── */
-import { useState } from "react";
-import "../Css/global.css";
+
 
 function AuthShell({ page }) {
   const [current, setCurrent] = useState(page);

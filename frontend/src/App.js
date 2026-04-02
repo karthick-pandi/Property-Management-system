@@ -1,5 +1,5 @@
 // App.jsx
-import AppRouter from "./Component/Approuter";
+import AppRouter from "./Router/Approuter";
 
 // Bootstrap & Icons — load once globally
 import "bootstrap/dist/css/bootstrap.min.css";

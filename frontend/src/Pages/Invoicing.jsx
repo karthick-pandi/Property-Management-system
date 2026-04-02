@@ -1,6 +1,6 @@
 // Pages/Invoicing.jsx
 import { useState } from "react";
-import "../Css/global.css";
+import "../Css/Global.css";
 
 const mockInvoices = [
   { id:"INV001", tenant:"Priya Sharma",  property:"Sunrise 2A", type:"Rent",   amount:18000, due:"05 Apr 2025", status:"Paid"     },
