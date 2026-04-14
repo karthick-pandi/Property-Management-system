@@ -1,6 +1,7 @@
 // Components/Sidebar.jsx
 import { useNavigate, useLocation } from "react-router-dom";
 import "../Css/sidebar.css";
+import logo from "../Assets/AUM_Sol_Corp_symbol_with_bg.png";
 
 // ← Put your logo image in src/assets/logo.png
 // import logo from "../assets/logo.png";
@@ -63,9 +64,9 @@ export default function Sidebar({ open, onClose }) {
         <div className="sidebar-logo">
           <div className="logo-icon">
             {/* If you have a logo image: */}
-            {/* <img src={logo} alt="Logo" /> */}
+            <img src={logo} alt="Logo" />
             {/* Fallback icon: */}
-            <i className="bi bi-building"></i>
+            {/* <i className="bi bi-building"></i> */}
           </div>
           <div className="logo-text">
             <span className="logo-name">AUM Sol Corp</span>
