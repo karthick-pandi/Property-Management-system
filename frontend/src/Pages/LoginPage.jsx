@@ -27,6 +27,8 @@ export default function LoginPage({ onSwitch }) {
       setLoading(false);
       setSubmitted(true);
     }, 1400);
+    localStorage.setItem("token", "fake-jwt-token");
+    localStorage.setItem("pms_user", JSON.stringify({ email: form.email }));
   };
 
   /* ── Success Screen ── */

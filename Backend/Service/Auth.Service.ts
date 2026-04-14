@@ -3,7 +3,7 @@ import { AppDataSource } from "../config/data-source";
 import { User } from "../Entity/User";
 import { SignupDTO, LoginDTO } from "../DTO/Auth.dto";
 
-const hashPassword    = require("../Utils/Hash");
+import { hashPassword } from "../Utils/Hash"; // 
 const comparePassword = require("../Utils/Hash"); // comparePassword export from same file
 
 const userRepo = AppDataSource.getRepository(User);

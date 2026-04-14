@@ -10,8 +10,8 @@ import Layout from "../Components/Layout";
 
 // Pages
 import Dashboard    from "../Pages/Dashboard";
-// import Customers    from "../Pages/Customers";
-// import Properties   from "../Pages/Properties";
+import Customers    from "../Pages/Customers ";
+import Properties   from "../Pages/Properties ";
 import Invoicing    from "../Pages/Invoicing";
 import TimeReporting from "../Pages/Timereporting";
 import LeaveManagement from "../Pages/levaemanagement";
@@ -33,13 +33,13 @@ import "../Css/Global.css";
 /* ── Protected Route ── */
 function ProtectedRoute({ children }) {
   const user = localStorage.getItem("pms_user");
-  return !user ? children : <Navigate to="/login" replace />;
+  return user ?  <Navigate to="/login" replace /> : children ;
 }
 
 /* ── Auth Route (redirect if already logged in) ── */
 function AuthRoute({ children }) {
   const user = localStorage.getItem("pms_user");
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  return !user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 /* ── Wrapped page helper ── */
@@ -68,8 +68,8 @@ export default function AppRouter() {
         <Route path="/dashboard"          element={<Page component={Dashboard}        />} />
 
         {/* Phase 1 */}
-        {/* <Route path="/customers"          element={<Page component={Customers}        />} />
-        <Route path="/properties"         element={<Page component={Properties}       />} /> */}
+        <Route path="/customers"          element={<Page component={Customers}        />} />
+        <Route path="/properties"         element={<Page component={Properties}       />} />
 
         {/* Phase 2 */}
         <Route path="/lease-agreement"    element={<Page component={LeaseAgreement}   />} />
