@@ -3,9 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "../Css/sidebar.css";
 import logo from "../Assets/AUM_Sol_Corp_symbol_with_bg.png";
 
-// ← Put your logo image in src/assets/logo.png
-// import logo from "../assets/logo.png";
-
 const navItems = [
   { section: "Main" },
   { label: "Dashboard",            icon: "bi-grid-1x2-fill",          path: "/dashboard" },
@@ -63,10 +60,7 @@ export default function Sidebar({ open, onClose }) {
         {/* ── Logo ── */}
         <div className="sidebar-logo">
           <div className="logo-icon">
-            {/* If you have a logo image: */}
             <img src={logo} alt="Logo" />
-            {/* Fallback icon: */}
-            {/* <i className="bi bi-building"></i> */}
           </div>
           <div className="logo-text">
             <span className="logo-name">AUM Sol Corp</span>
