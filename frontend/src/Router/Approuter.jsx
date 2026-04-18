@@ -33,13 +33,13 @@ import "../Css/Global.css";
 /* ── Protected Route ── */
 function ProtectedRoute({ children }) {
   const user = localStorage.getItem("pms_user");
-  return user ?  <Navigate to="/login" replace /> : children ;
+  return !user ?  <Navigate to="/login" replace /> : children ;
 }
 
 /* ── Auth Route (redirect if already logged in) ── */
 function AuthRoute({ children }) {
   const user = localStorage.getItem("pms_user");
-  return !user ? <Navigate to="/dashboard" replace /> : children;
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 /* ── Wrapped page helper ── */

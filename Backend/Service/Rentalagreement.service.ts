@@ -1,7 +1,7 @@
 // Service/RentalAgreement.Service.ts
 import { AppDataSource }    from "../config/data-source";
-import { RentalAgreement }  from "../Entity/RentalAgreement";
-import { CreateRentalDTO, UpdateRentalDTO } from "../DTO/RentalAgreement.dto";
+import { RentalAgreement }  from "../Entity/Rentalagreement";
+import { CreateRentalDTO, UpdateRentalDTO } from "../DTO/Rental.dto";
 import path  from "path";
 import fs    from "fs";
 
@@ -49,7 +49,8 @@ export const createRental = async (
     docs: savedDocs,
   });
 
-  return await repo.save(rental);
+  const result = await repo.save(rental);
+  return (Array.isArray(result) ? result[0] : result) as RentalAgreement;
 };
 
 /* ──────────────────────────────────────
@@ -110,8 +111,8 @@ export const deleteDocument = async (
   // Remove file from disk
   const doc = rental.docs?.find(d => d.name === fileName);
 
-  if (doc) {
-    const filePath = path.join(__dirname, "../../", doc?.url);
+  if (doc?.url) {
+    const filePath = path.join(__dirname, "../../", doc.url);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   }
 
@@ -127,8 +128,10 @@ export const deleteRental = async (id: number): Promise<void> => {
 
   // Delete all attached files from disk
   (rental.docs || []).forEach(doc => {
-    const filePath = path.join(__dirname, "../../", doc.url);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    if (doc.url) {
+      const filePath = path.join(__dirname, "../../", doc.url);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
   });
 
   await repo.delete(id);

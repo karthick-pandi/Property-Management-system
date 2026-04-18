@@ -16,21 +16,40 @@ export default function LoginPage({ onSwitch }) {
     setError("");
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.email || !form.password) {
-      setError("Please enter your email and password.");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1400);
-    localStorage.setItem("token", "fake-jwt-token");
-    localStorage.setItem("pms_user", JSON.stringify({ email: form.email }));
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!form.email || !form.password) {
+    setError("Please enter your email and password.");
+    return;
+  }
 
+  setLoading(true);
+
+  try {
+    const res = await fetch("http://localhost:5000/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email, password: form.password }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Login failed");
+    }
+
+    const user = await res.json();
+
+    // User details localStorage-ல save பண்ணு
+    localStorage.setItem("pms_user", JSON.stringify(user));
+
+    // Dashboard-க்கு redirect பண்ணு
+    window.location.href = "/dashboard";
+
+  } catch (err) {
+    setError(err.message);
+    setLoading(false);
+  }
+};
   /* ── Success Screen ── */
   if (submitted) {
     return (
