@@ -61,7 +61,7 @@ export default function RentalAgreement() {
       const params = {};
       if (filter !== "All") params.status = filter;
       if (search)           params.tenant  = search;
-      const res = await axios.get(API, { params });
+      const res = await axios.get('http://localhost:5000/api/rental-agreements', { params });
       setRentals(res.data.rentals || []);
     } catch {
       setError("Failed to load rentals.");
@@ -93,7 +93,7 @@ export default function RentalAgreement() {
       fd.append("userId", String(user.id || 1));
       files.forEach(f => fd.append("docs", f));
 
-      await axios.post(API, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      await axios.post("http://localhost:5000/api/rental-agreements", fd, { headers: { "Content-Type": "multipart/form-data" } });
 
       setForm(emptyForm); setFiles([]); setShow(false);
       fetchRentals();
@@ -109,7 +109,7 @@ export default function RentalAgreement() {
   if (!window.confirm("Delete this rental agreement?")) return;
 
   try {
-    await axios.delete(`${API}/${id}`);
+    await axios.delete(`http://localhost:5000/api/rental-agreements/${id}`);
     fetchRentals();
   } catch {
     setError("Failed to delete.");
@@ -118,7 +118,7 @@ export default function RentalAgreement() {
 
   /* ── Remove a doc from existing record ── */
   const handleRemoveDoc = async (id, fileName) => {
-    try { await axios.delete(`${API}/${id}/doc`, { data: { fileName } }); fetchRentals(); }
+    try { await axios.delete(`http://localhost:5000/api/rental-agreements/${id}/doc`, { data: { fileName } }); fetchRentals(); }
     catch { setError("Failed to remove document."); }
   };
 

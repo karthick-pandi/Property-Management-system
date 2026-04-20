@@ -1,46 +1,55 @@
 // Pages/LeaseAgreement.jsx
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import "../Css/Global.css";
 
-const mockLeases = [
-  { id:"LA001", tenant:"Priya Sharma",  property:"Sunrise Apt 2A",     start:"01 Jan 2025", end:"31 Dec 2025", rent:18000, deposit:36000, status:"Active",  docs:["Lease_LA001.pdf"] },
-  { id:"LA002", tenant:"Sunita Reddy",  property:"Royal Residency 5B", start:"01 Mar 2025", end:"28 Feb 2026", rent:22000, deposit:44000, status:"Active",  docs:["Agreement_LA002.pdf","ID_Proof.jpg"] },
-  { id:"LA003", tenant:"Kiran Mehta",   property:"Green Villa 3",       start:"15 Apr 2024", end:"14 Apr 2025", rent:35000, deposit:70000, status:"Expired", docs:[] },
-  { id:"LA004", tenant:"Mohan Das",     property:"Tech Park 2A",        start:"01 Feb 2025", end:"31 Jan 2026", rent:28000, deposit:56000, status:"Active",  docs:["Lease_LA004.pdf"] },
-  { id:"LA005", tenant:"Divya Nair",    property:"City Hub 4B",         start:"01 Jun 2024", end:"31 May 2025", rent:14000, deposit:28000, status:"Expired", docs:[] },
-];
+const API = "http://localhost:5000/api/lease-agreements";
+const leaseTermOptions = ["6", "12", "24", "36"];
+const paymentOptions = ["Bank Transfer", "UPI", "Cash", "Cheque"];
+const statusColor = { Active: "success", Expired: "danger", Terminated: "danger", "Renewal Pending": "warning" };
 
-const empty = {
-  tenant:"", property:"", start:"", end:"",
-  rent:"", deposit:"", status:"Active",
-  notes:"", docs:[],
+const emptyForm = {
+  tenant: "",
+  landlord: "",
+  property: "",
+  propertyUnit: "",
+  propertyType: "Residential",
+  propertyAddress: "",
+  startDate: "",
+  endDate: "",
+  leaseTerm: "12",
+  monthlyRent: "",
+  securityDeposit: "",
+  maintenanceCharge: "",
+  utilityCharge: "",
+  rentDueDay: "1",
+  paymentMode: "Bank Transfer",
+  increasePercentage: "",
+  terms: "",
+  notes: "",
+  autoRenewal: false,
+  status: "Active",
+  userId: 1,
 };
 
-const statusColor = { Active:"success", Expired:"danger", Pending:"warning" };
-
-/* ── File type icon helper ── */
-function fileIcon(name) {
-  const ext = name.split(".").pop().toLowerCase();
-  if (ext === "pdf")                          return { icon:"bi-file-earmark-pdf-fill",   color:"#c0392b" };
-  if (["jpg","jpeg","png"].includes(ext))     return { icon:"bi-file-earmark-image-fill",  color:"#1565a0" };
-  if (["doc","docx"].includes(ext))           return { icon:"bi-file-earmark-word-fill",   color:"#1a6b9a" };
-  return                                             { icon:"bi-file-earmark-fill",         color:"#6b7a90" };
+/* ── File icon helper ── */
+function fileIcon(name = "") {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return { icon: "bi-file-earmark-pdf-fill", color: "#c0392b" };
+  if (["jpg", "jpeg", "png"].includes(ext)) return { icon: "bi-file-earmark-image-fill", color: "#1565a0" };
+  if (["doc", "docx"].includes(ext)) return { icon: "bi-file-earmark-word-fill", color: "#2980b9" };
+  return { icon: "bi-file-earmark-fill", color: "#6b7a90" };
 }
 
-/* ── Document chip ── */
+/* ── Doc chip ── */
 function DocChip({ name, onRemove }) {
   const { icon, color } = fileIcon(name);
   return (
-    <div style={{
-      display:"flex", alignItems:"center", gap:"0.4rem",
-      background:"var(--cream-dark)", border:"1.5px solid var(--border)",
-      borderRadius:8, padding:"0.3rem 0.65rem",
-      fontSize:"0.78rem", color:"var(--text-mid)", maxWidth:200,
-    }}>
-      <i className={`bi ${icon}`} style={{ color, fontSize:"0.95rem", flexShrink:0 }}></i>
-      <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1 }}>{name}</span>
+    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", background: "var(--cream-dark)", border: "1.5px solid var(--border)", borderRadius: 8, padding: "0.3rem 0.65rem", fontSize: "0.78rem", color: "var(--text-mid)", maxWidth: 210 }}>
+      <i className={`bi ${icon}`} style={{ color, fontSize: "0.95rem", flexShrink: 0 }}></i>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{name}</span>
       {onRemove && (
-        <button onClick={onRemove} style={{ background:"none", border:"none", cursor:"pointer", color:"var(--danger)", padding:0, fontSize:"0.8rem", lineHeight:1, flexShrink:0 }}>
+        <button onClick={onRemove} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--danger)", padding: 0, fontSize: "0.8rem", flexShrink: 0 }}>
           <i className="bi bi-x-lg"></i>
         </button>
       )}
@@ -49,68 +58,143 @@ function DocChip({ name, onRemove }) {
 }
 
 export default function LeaseAgreement() {
-  const [leases, setLeases]     = useState(mockLeases);
-  const [showForm, setShow]     = useState(false);
-  const [form, setForm]         = useState(empty);
-  const [filter, setFilter]     = useState("All");
-  const [search, setSearch]     = useState("");
+  const [leases, setLeases] = useState([]);
+  const [showForm, setShow] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [files, setFiles] = useState([]);
+  const [filter, setFilter] = useState("All");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
-  const fileInputRef            = useRef();
+  const [editingId, setEditingId] = useState(null);
+  const fileRef = useRef();
 
-  const filtered = leases
-    .filter(l => filter === "All" || l.status === filter)
-    .filter(l =>
-      l.tenant.toLowerCase().includes(search.toLowerCase()) ||
-      l.property.toLowerCase().includes(search.toLowerCase())
-    );
-
-  /* ── File handlers ── */
-  const addFiles = (files) => {
-    const names  = Array.from(files).map(f => f.name);
-    const unique = names.filter(n => !form.docs.includes(n));
-    setForm(prev => ({ ...prev, docs: [...prev.docs, ...unique] }));
+  /* ── Fetch Leases ── */
+  const fetchLeases = async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (filter !== "All") params.status = filter;
+      if (search) params.tenant = search;
+      const res = await axios.get(API, { params });
+      setLeases(res.data.leases || []);
+    } catch {
+      setError("Failed to load leases.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleFileInput = (e) => {
-    if (e.target.files.length) addFiles(e.target.files);
-    e.target.value = "";
-  };
+  useEffect(() => { fetchLeases(); }, [filter]);
 
-  const handleDrop = (e) => {
+  /* ── File helpers ── */
+  const addFiles = (list) => {
+    const arr = Array.from(list);
+    const unique = arr.filter(f => !files.find(x => x.name === f.name));
+    setFiles(p => [...p, ...unique]);
+  };
+  const removeFile = (name) => setFiles(p => p.filter(f => f.name !== name));
+  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); };
+
+  /* ── Submit (Create/Update) ── */
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setDragOver(false);
-    if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+    setSaving(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      const user = JSON.parse(localStorage.getItem("pms_user") || "{}");
+
+      Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+      fd.append("userId", String(user.id || 1));
+      files.forEach(f => fd.append("docs", f));
+
+      if (editingId) {
+        await axios.put(`${API}/${editingId}`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      } else {
+        await axios.post(API, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      }
+
+      setForm(emptyForm);
+      setFiles([]);
+      setShow(false);
+      setEditingId(null);
+      fetchLeases();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to save.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const removeDoc = (name) =>
-    setForm(prev => ({ ...prev, docs: prev.docs.filter(d => d !== name) }));
-
-  /* ── Submit ── */
-  const handleAdd = (e) => {
-    e.preventDefault();
-    setLeases([...leases, {
-      ...form,
-      id:      "LA" + String(leases.length + 1).padStart(3, "0"),
-      rent:    Number(form.rent),
-      deposit: Number(form.deposit),
-    }]);
-    setForm(empty);
-    setShow(false);
+  /* ── Edit Lease ── */
+  const handleEdit = (lease) => {
+    setForm({
+      tenant: lease.tenant || "",
+      landlord: lease.landlord || "",
+      property: lease.property || "",
+      propertyUnit: lease.propertyUnit || "",
+      propertyType: lease.propertyType || "Residential",
+      propertyAddress: lease.propertyAddress || "",
+      startDate: lease.startDate || "",
+      endDate: lease.endDate || "",
+      leaseTerm: lease.leaseTerm || "12",
+      monthlyRent: lease.monthlyRent || "",
+      securityDeposit: lease.securityDeposit || "",
+      maintenanceCharge: lease.maintenanceCharge || "",
+      utilityCharge: lease.utilityCharge || "",
+      rentDueDay: lease.rentDueDay || "1",
+      paymentMode: lease.paymentMode || "Bank Transfer",
+      increasePercentage: lease.increasePercentage || "",
+      terms: lease.terms || "",
+      notes: lease.notes || "",
+      autoRenewal: lease.autoRenewal || false,
+      status: lease.status || "Active",
+      userId: lease.userId || 1,
+    });
+    setEditingId(lease.id);
+    setShow(true);
   };
+
+  /* ── Delete Lease ── */
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this lease agreement?")) return;
+
+    try {
+      await axios.delete(`${API}/${id}`);
+      fetchLeases();
+    } catch {
+      setError("Failed to delete.");
+    }
+  };
+
+  /* ── Remove Doc ── */
+  const handleRemoveDoc = async (id, fileName) => {
+    try {
+      await axios.delete(`${API}/${id}/doc`, { data: { fileName } });
+      fetchLeases();
+    } catch {
+      setError("Failed to remove document.");
+    }
+  };
+
+  const filtered = leases.filter(l =>
+    l.tenant?.toLowerCase().includes(search.toLowerCase()) ||
+    l.property?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <>
       <div className="page-header">
-        <h2>
-          <i className="bi bi-file-earmark-text-fill" style={{ marginRight:8, color:"var(--maroon-main)" }}></i>
-          Lease Agreement
-        </h2>
+        <h2><i className="bi bi-file-earmark-text-fill" style={{ marginRight: 8, color: "var(--maroon-main)" }}></i>Lease Agreement</h2>
         <p>Create and manage all tenant lease agreements with supporting documents.</p>
       </div>
 
       {/* Stats */}
       <div className="stat-grid">
-        {["Active","Expired","Pending"].map(s => (
+        {["Active", "Expired", "Terminated"].map(s => (
           <div className="stat-card" key={s}>
             <div className={`stat-icon ${statusColor[s]}`}><i className="bi bi-file-earmark-text-fill"></i></div>
             <div>
@@ -123,167 +207,200 @@ export default function LeaseAgreement() {
           <div className="stat-icon gold"><i className="bi bi-cash-coin"></i></div>
           <div>
             <div className="stat-label">Monthly Income</div>
-            <div className="stat-value">
-              ₹{(leases.filter(l => l.status === "Active").reduce((a,l) => a + l.rent, 0) / 1000).toFixed(0)}K
-            </div>
+            <div className="stat-value">₹{(leases.filter(l => l.status === "Active").reduce((a, l) => a + Number(l.monthlyRent), 0) / 1000).toFixed(0)}K</div>
           </div>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div style={{ display:"flex", gap:"0.75rem", marginBottom:"1.25rem", flexWrap:"wrap", alignItems:"center" }}>
+      <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
         <input
-          style={{ flex:1, minWidth:200, border:"1.5px solid var(--border)", borderRadius:9, padding:"0.55rem 0.85rem", fontSize:"0.88rem", background:"var(--white)", fontFamily:"DM Sans,sans-serif", color:"var(--text-dark)" }}
+          style={{ flex: 1, minWidth: 200, border: "1.5px solid var(--border)", borderRadius: 9, padding: "0.55rem 0.85rem", fontSize: "0.88rem", background: "var(--white)", fontFamily: "DM Sans,sans-serif", color: "var(--text-dark)" }}
           placeholder="🔍  Search tenant or property..."
           value={search}
           onChange={e => setSearch(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && fetchLeases()}
         />
-        {["All","Active","Expired","Pending"].map(f => (
-          <button key={f} className={`btn-pms ${filter===f?"primary":"secondary"}`}
-            style={{ padding:"0.4rem 0.9rem", fontSize:"0.82rem" }}
+        {["All", "Active", "Expired", "Terminated", "Renewal Pending"].map(f => (
+          <button key={f} className={`btn-pms ${filter === f ? "primary" : "secondary"}`}
+            style={{ padding: "0.4rem 0.9rem", fontSize: "0.82rem" }}
             onClick={() => setFilter(f)}>{f}
           </button>
         ))}
-        <button className="btn-pms gold" onClick={() => setShow(!showForm)}>
+        <button className="btn-pms gold" onClick={() => { setShow(!showForm); setEditingId(null); setForm(emptyForm); setFiles([]); }}>
           <i className="bi bi-plus-lg"></i> New Lease
         </button>
       </div>
 
-      {/* ══ Add Form ══ */}
+      {error && (
+        <div style={{ background: "#fdf0f0", border: "1.5px solid #e8b0b0", borderRadius: 10, padding: "0.7rem 1rem", marginBottom: "1rem", fontSize: "0.87rem", color: "var(--maroon-dark)" }}>
+          <i className="bi bi-exclamation-circle me-2"></i>{error}
+          <button onClick={() => setError("")} style={{ float: "right", background: "none", border: "none", cursor: "pointer", fontSize: "0.9rem" }}>✕</button>
+        </div>
+      )}
+
+      {/* ══ Form ══ */}
       {showForm && (
-        <div className="pms-card" style={{ marginBottom:"1.25rem" }}>
-          <h3 style={{ fontSize:"1rem", marginBottom:"1.25rem" }}>New Lease Agreement</h3>
-          <form onSubmit={handleAdd}>
+        <div className="pms-card" style={{ marginBottom: "1.25rem" }}>
+          <h3 style={{ fontSize: "1rem", marginBottom: "1.25rem" }}>
+            {editingId ? "Edit Lease Agreement" : "New Lease Agreement"}
+          </h3>
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid" style={{ marginBottom: "1rem" }}>
 
-            <div className="form-grid" style={{ marginBottom:"1rem" }}>
-
-              {/* Tenant & Property */}
               <div className="field-group">
                 <label>Tenant Name *</label>
-                <input required value={form.tenant} onChange={e=>setForm({...form,tenant:e.target.value})} placeholder="Priya Sharma" />
+                <input required value={form.tenant} onChange={e => setForm({ ...form, tenant: e.target.value })} placeholder="Priya Sharma" />
               </div>
               <div className="field-group">
-                <label>Property / Unit *</label>
-                <input required value={form.property} onChange={e=>setForm({...form,property:e.target.value})} placeholder="Sunrise Apt 2A" />
+                <label>Landlord Name *</label>
+                <input required value={form.landlord} onChange={e => setForm({ ...form, landlord: e.target.value })} placeholder="John Doe" />
               </div>
-
-              {/* Dates */}
+              <div className="field-group">
+                <label>Property Name *</label>
+                <input required value={form.property} onChange={e => setForm({ ...form, property: e.target.value })} placeholder="Sunrise Apt 2A" />
+              </div>
+              <div className="field-group">
+                <label>Unit No</label>
+                <input value={form.propertyUnit} onChange={e => setForm({ ...form, propertyUnit: e.target.value })} placeholder="2A" />
+              </div>
+              <div className="field-group">
+                <label>Property Type</label>
+                <select value={form.propertyType} onChange={e => setForm({ ...form, propertyType: e.target.value })}>
+                  {["Residential", "Commercial", "Villa", "Hotel", "Hostel"].map(t => <option key={t}>{t}</option>)}
+                </select>
+              </div>
+              <div className="field-group">
+                <label>Property Address</label>
+                <input value={form.propertyAddress} onChange={e => setForm({ ...form, propertyAddress: e.target.value })} placeholder="Full address" />
+              </div>
               <div className="field-group">
                 <label>Start Date *</label>
-                <input required type="date" value={form.start} onChange={e=>setForm({...form,start:e.target.value})} />
+                <input required type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} />
               </div>
               <div className="field-group">
                 <label>End Date *</label>
-                <input required type="date" value={form.end} onChange={e=>setForm({...form,end:e.target.value})} />
+                <input required type="date" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} />
               </div>
-
-              {/* Financials */}
+              <div className="field-group">
+                <label>Lease Term (months)</label>
+                <select value={form.leaseTerm} onChange={e => setForm({ ...form, leaseTerm: e.target.value })}>
+                  {leaseTermOptions.map(t => <option key={t}>{t}</option>)}
+                </select>
+              </div>
               <div className="field-group">
                 <label>Monthly Rent (₹) *</label>
-                <input required type="number" value={form.rent} onChange={e=>setForm({...form,rent:e.target.value})} placeholder="18000" />
+                <input required type="number" value={form.monthlyRent} onChange={e => setForm({ ...form, monthlyRent: e.target.value })} placeholder="18000" />
               </div>
               <div className="field-group">
                 <label>Security Deposit (₹)</label>
-                <input type="number" value={form.deposit} onChange={e=>setForm({...form,deposit:e.target.value})} placeholder="36000" />
+                <input type="number" value={form.securityDeposit} onChange={e => setForm({ ...form, securityDeposit: e.target.value })} placeholder="36000" />
               </div>
-
-              {/* Status */}
               <div className="field-group">
-                <label>Status</label>
-                <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})}>
-                  <option>Active</option>
-                  <option>Pending</option>
-                  <option>Expired</option>
+                <label>Maintenance Charge (₹)</label>
+                <input type="number" value={form.maintenanceCharge} onChange={e => setForm({ ...form, maintenanceCharge: e.target.value })} placeholder="500" />
+              </div>
+              <div className="field-group">
+                <label>Utility Charge (₹)</label>
+                <input type="number" value={form.utilityCharge} onChange={e => setForm({ ...form, utilityCharge: e.target.value })} placeholder="200" />
+              </div>
+              <div className="field-group">
+                <label>Rent Due Day (1–28)</label>
+                <input type="number" min="1" max="28" value={form.rentDueDay} onChange={e => setForm({ ...form, rentDueDay: e.target.value })} />
+              </div>
+              <div className="field-group">
+                <label>Payment Mode</label>
+                <select value={form.paymentMode} onChange={e => setForm({ ...form, paymentMode: e.target.value })}>
+                  {paymentOptions.map(p => <option key={p}>{p}</option>)}
                 </select>
               </div>
-
-              {/* Notes */}
+              <div className="field-group">
+                <label>Annual Rent Increase (%)</label>
+                <input type="number" value={form.increasePercentage} onChange={e => setForm({ ...form, increasePercentage: e.target.value })} placeholder="5" />
+              </div>
+              <div className="field-group">
+                <label>Status</label>
+                <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+                  <option>Active</option>
+                  <option>Expired</option>
+                  <option>Terminated</option>
+                  <option>Renewal Pending</option>
+                </select>
+              </div>
+              <div className="field-group" style={{ justifyContent: "flex-end" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", marginTop: "1.5rem" }}>
+                  <input type="checkbox" checked={form.autoRenewal} onChange={e => setForm({ ...form, autoRenewal: e.target.checked })} />
+                  Auto Renewal
+                </label>
+              </div>
+              <div className="field-group form-full">
+                <label>Terms & Conditions</label>
+                <textarea value={form.terms} onChange={e => setForm({ ...form, terms: e.target.value })} placeholder="Lease terms..." />
+              </div>
               <div className="field-group form-full">
                 <label>Notes / Remarks</label>
-                <textarea
-                  value={form.notes}
-                  onChange={e=>setForm({...form,notes:e.target.value})}
-                  placeholder="Any additional terms or remarks..."
-                />
+                <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Internal remarks..." />
               </div>
             </div>
 
-            {/* ══ Document Upload ══ */}
-            <div style={{ marginBottom:"1.25rem" }}>
-              <label style={{ fontSize:"0.82rem", fontWeight:600, color:"var(--text-mid)", display:"block", marginBottom:"0.5rem" }}>
-                <i className="bi bi-paperclip" style={{ marginRight:5, color:"var(--maroon-main)" }}></i>
+            {/* ── Document Upload ── */}
+            <div style={{ marginBottom: "1.25rem" }}>
+              <label style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-mid)", display: "block", marginBottom: "0.5rem" }}>
+                <i className="bi bi-paperclip" style={{ marginRight: 5, color: "var(--maroon-main)" }}></i>
                 Supporting Documents
-                <span style={{ fontSize:"0.74rem", fontWeight:400, color:"var(--text-muted)", marginLeft:6 }}>
+                <span style={{ fontSize: "0.74rem", fontWeight: 400, color: "var(--text-muted)", marginLeft: 6 }}>
                   Lease deed, ID proof, NOC, photos…
                 </span>
               </label>
 
-              {/* Drop zone */}
               <div
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
-                onClick={() => fileInputRef.current.click()}
+                onClick={() => fileRef.current.click()}
                 style={{
-                  border:       `2px dashed ${dragOver ? "var(--maroon-main)" : "var(--border)"}`,
-                  borderRadius: 12,
-                  padding:      "1.5rem 1rem",
-                  background:   dragOver ? "rgba(139,32,32,0.04)" : "var(--cream)",
-                  cursor:       "pointer",
-                  textAlign:    "center",
-                  transition:   "all 0.2s",
+                  border: `2px dashed ${dragOver ? "var(--maroon-main)" : "var(--border)"}`,
+                  borderRadius: 12, padding: "1.5rem 1rem",
+                  background: dragOver ? "rgba(139,32,32,0.04)" : "var(--cream)",
+                  cursor: "pointer", textAlign: "center", transition: "all 0.2s",
                   marginBottom: "0.75rem",
                 }}
               >
-                <i className="bi bi-cloud-upload-fill" style={{
-                  fontSize:"2rem",
-                  color: dragOver ? "var(--maroon-main)" : "var(--text-muted)",
-                  display:"block", marginBottom:"0.4rem",
-                }}></i>
-                <div style={{ fontSize:"0.86rem", fontWeight:600, color:"var(--text-mid)" }}>
-                  Drag & drop files here, or{" "}
-                  <span style={{ color:"var(--maroon-main)", textDecoration:"underline" }}>click to browse</span>
+                <i className="bi bi-cloud-upload-fill" style={{ fontSize: "2rem", color: dragOver ? "var(--maroon-main)" : "var(--text-muted)", display: "block", marginBottom: "0.4rem" }}></i>
+                <div style={{ fontSize: "0.86rem", fontWeight: 600, color: "var(--text-mid)" }}>
+                  Drag & drop, or <span style={{ color: "var(--maroon-main)", textDecoration: "underline" }}>click to browse</span>
                 </div>
-                <div style={{ fontSize:"0.75rem", color:"var(--text-muted)", marginTop:"0.25rem" }}>
-                  Supported: PDF, JPG, PNG, DOC, DOCX — Max 10MB each
+                <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
+                  PDF, JPG, PNG, DOC, DOCX — Max 10MB each
                 </div>
               </div>
 
-              {/* Hidden input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                style={{ display:"none" }}
-                onChange={handleFileInput}
-              />
+              <input ref={fileRef} type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                style={{ display: "none" }} onChange={e => { addFiles(e.target.files); e.target.value = ""; }} />
 
-              {/* File chips */}
-              {form.docs.length > 0 ? (
+              {files.length > 0 ? (
                 <div>
-                  <div style={{ fontSize:"0.78rem", color:"var(--text-muted)", marginBottom:"0.4rem" }}>
-                    {form.docs.length} file{form.docs.length > 1 ? "s" : ""} attached
+                  <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginBottom: "0.4rem" }}>
+                    {files.length} file{files.length > 1 ? "s" : ""} ready to upload
                   </div>
-                  <div style={{ display:"flex", flexWrap:"wrap", gap:"0.5rem" }}>
-                    {form.docs.map(name => (
-                      <DocChip key={name} name={name} onRemove={() => removeDoc(name)} />
-                    ))}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                    {files.map(f => <DocChip key={f.name} name={f.name} onRemove={() => removeFile(f.name)} />)}
                   </div>
                 </div>
               ) : (
-                <div style={{ fontSize:"0.78rem", color:"var(--text-muted)", textAlign:"center" }}>
-                  No documents attached yet
-                </div>
+                <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", textAlign: "center" }}>No files selected</div>
               )}
             </div>
 
             {/* Actions */}
-            <div style={{ display:"flex", gap:"0.75rem", paddingTop:"0.75rem", borderTop:"1px solid var(--border)" }}>
-              <button className="btn-pms primary" type="submit">
-                <i className="bi bi-check-lg"></i> Save Lease
+            <div style={{ display: "flex", gap: "0.75rem", paddingTop: "0.75rem", borderTop: "1px solid var(--border)" }}>
+              <button className="btn-pms primary" type="submit" disabled={saving}>
+                {saving
+                  ? <><span className="spinner-border spinner-border-sm me-2"></span>Saving...</>
+                  : <><i className="bi bi-check-lg"></i> {editingId ? "Update" : "Save"} Lease</>}
               </button>
-              <button className="btn-pms secondary" type="button" onClick={() => { setShow(false); setForm(empty); }}>
+              <button className="btn-pms secondary" type="button"
+                onClick={() => { setShow(false); setForm(emptyForm); setFiles([]); setEditingId(null); }}>
                 Cancel
               </button>
             </div>
@@ -293,60 +410,68 @@ export default function LeaseAgreement() {
 
       {/* ══ Table ══ */}
       <div className="pms-card">
-        <div className="pms-table-wrap">
-          <table className="pms-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Tenant</th>
-                <th>Property</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Monthly Rent</th>
-                <th>Deposit</th>
-                <th>Documents</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(l => (
-                <tr key={l.id}>
-                  <td style={{ fontWeight:600, color:"var(--maroon-main)" }}>{l.id}</td>
-                  <td style={{ fontWeight:500 }}>{l.tenant}</td>
-                  <td style={{ color:"var(--text-muted)", fontSize:"0.82rem" }}>{l.property}</td>
-                  <td style={{ fontSize:"0.82rem" }}>{l.start}</td>
-                  <td style={{ fontSize:"0.82rem" }}>{l.end}</td>
-                  <td style={{ fontWeight:600 }}>₹{l.rent.toLocaleString("en-IN")}</td>
-                  <td style={{ color:"var(--text-muted)" }}>₹{l.deposit.toLocaleString("en-IN")}</td>
-
-                  {/* Documents column */}
-                  <td>
-                    {l.docs && l.docs.length > 0 ? (
-                      <div style={{ display:"flex", flexDirection:"column", gap:"0.3rem" }}>
-                        {l.docs.map(name => (
-                          <DocChip key={name} name={name} />
-                        ))}
-                      </div>
-                    ) : (
-                      <span style={{ fontSize:"0.78rem", color:"var(--text-muted)" }}>— No docs</span>
-                    )}
-                  </td>
-
-                  <td>
-                    <span className={`badge-pms ${statusColor[l.status]}`}>{l.status}</span>
-                  </td>
-                  <td>
-                    <div style={{ display:"flex", gap:"0.4rem" }}>
-                      <button className="btn-pms sm secondary"><i className="bi bi-pencil"></i></button>
-                      <button className="btn-pms sm danger"><i className="bi bi-trash"></i></button>
-                    </div>
-                  </td>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "2rem", color: "var(--text-muted)" }}>
+            <span className="spinner-border spinner-border-sm me-2"></span>Loading...
+          </div>
+        ) : (
+          <div className="pms-table-wrap">
+            <table className="pms-table">
+              <thead>
+                <tr>
+                  <th>Lease ID</th>
+                  <th>Tenant</th>
+                  <th>Landlord</th>
+                  <th>Property</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Monthly Rent</th>
+                  <th>Documents</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map(l => (
+                  <tr key={l.id}>
+                    <td style={{ fontWeight: 600, color: "var(--maroon-main)", fontSize: "0.78rem" }}>{l.leaseId}</td>
+                    <td style={{ fontWeight: 500 }}>{l.tenant}</td>
+                    <td style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>{l.landlord}</td>
+                    <td style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>{l.property} {l.propertyUnit}</td>
+                    <td style={{ fontSize: "0.82rem" }}>{l.startDate}</td>
+                    <td style={{ fontSize: "0.82rem" }}>{l.endDate}</td>
+                    <td style={{ fontWeight: 600 }}>₹{Number(l.monthlyRent).toLocaleString("en-IN")}</td>
+                    <td>
+                      {l.docs && l.docs.length > 0 ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                          {l.docs.map(d => (
+                            <DocChip key={d.name} name={d.name} onRemove={() => handleRemoveDoc(l.id, d.name)} />
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>— No docs</span>
+                      )}
+                    </td>
+                    <td><span className={`badge-pms ${statusColor[l.status]}`}>{l.status}</span></td>
+                    <td>
+                      <div style={{ display: "flex", gap: "0.4rem" }}>
+                        <button className="btn-pms sm secondary" onClick={() => handleEdit(l)}><i className="bi bi-pencil"></i></button>
+                        <button className="btn-pms sm danger" onClick={() => handleDelete(l.id)}><i className="bi bi-trash"></i></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={10} style={{ textAlign: "center", padding: "2rem", color: "var(--text-muted)" }}>
+                      No lease agreements found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </>
   );

@@ -17,9 +17,9 @@ import TimeReporting from "../Pages/Timereporting";
 import LeaveManagement from "../Pages/levaemanagement";
 
 import LeaseAgreement    from "../Pages/Leaseagreement ";
-import LeaseCancellation from "../Pages/Leasecancellation ";
+import LeaseCancellation from "../Pages/LeaseCancellation";
 import RentalAgreement   from "../Pages/Rentalagreement ";
-import RentalCancellation from "../Pages/Rentalcancellation";
+import RentalCancellation from "../Pages/RentalCancellation";
 import Maintenance       from "../Pages/Maintenance";
 import Vendors           from "../Pages/Vendors";
 import PurchaseRequest   from "../Pages/Purchaserequest";

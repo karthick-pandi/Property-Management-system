@@ -10,17 +10,20 @@
   --maroon-dark:   #3b0a0a;
   --maroon-mid:    #6b1a1a;
   --maroon-main:   #8b2020;
-  --maroon-light:  #b03030;
-  --maroon-accent: #d4504a;
-  --gold:          #c9973a;
-  --gold-light:    #e8c278;
-  --cream:         #fdf6f0;
-  --cream-dark:    #f5e9de;
-  --text-dark:     #1e0a0a;
-  --text-mid:      #5a2a2a;
-  --text-muted:    #9a6a6a;
-  --border:        #e8d0c8;
-  --input-bg:      #fdf6f0;
+    --maroon-dark:   #0d1b2a;
+    --maroon-mid:    #1a2f4a;
+    --maroon-main:   #1e3a5f;
+    --maroon-light:  #2563a8;
+    --maroon-accent: #3b82c4;
+    --gold:          #c9973a;
+    --gold-light:    #e8c278;
+    --cream:         #f0f4f8;
+    --cream-dark:    #e4eaf1;
+    --text-dark:     #0d1b2a;
+    --text-mid:      #2d4460;
+    --text-muted:    #6b84a0;
+    --border:        #d1dce8;
+    --input-bg:      #f5f8fb;
   --white:         #ffffff;
 }
 
@@ -61,7 +64,7 @@ body {
   width: 480px;
   height: 480px;
   border-radius: 50%;
-  background: rgba(201, 151, 58, 0.08);
+  background: rgba(59, 130, 196, 0.08);
   top: -140px;
   right: -160px;
 }
@@ -72,7 +75,7 @@ body {
   width: 280px;
   height: 280px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
   bottom: -90px;
   left: -70px;
 }
@@ -88,7 +91,7 @@ body {
 .brand-icon {
   width: 44px;
   height: 44px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  background: linear-gradient(135deg, var(--maroon-light), var(--maroon-accent));
   border-radius: 11px;
   display: flex;
   align-items: center;
@@ -140,8 +143,8 @@ body {
 }
 
 .feature-chip {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(201, 151, 58, 0.25);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 12px;
   padding: 0.8rem 1rem;
   display: flex;
@@ -153,7 +156,7 @@ body {
 }
 
 .feature-chip i {
-  color: var(--gold-light);
+  color: var(--gold);
   font-size: 1.05rem;
 }
 
