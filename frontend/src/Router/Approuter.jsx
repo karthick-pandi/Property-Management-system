@@ -110,43 +110,60 @@ function AuthShell({ page }) {
       {/* Left decorative panel */}
       <div style={{
         flex:"0 0 42%",
-        background:"linear-gradient(160deg, #3b0a0a 0%, #6b1a1a 55%, #8b2020 100%)",
+        background:"linear-gradient(160deg, #0d1b2a 0%, #1a2f4a 55%, #1e3a5f 100%)",
         display:"flex", flexDirection:"column", justifyContent:"space-between",
         padding:"3rem", position:"relative", overflow:"hidden",
       }} className="d-none d-md-flex auth-left-panel">
         <style>{`
           .auth-left-panel::before {
-            content:''; position:absolute; width:480px; height:480px; border-radius:50%;
-            background:rgba(201,151,58,0.08); top:-140px; right:-160px;
+            content:''; position:absolute; width:500px; height:500px; border-radius:50%;
+            background:rgba(37,99,168,0.15); top:-150px; right:-160px;
+          }
+          .auth-left-panel::after {
+            content:''; position:absolute; width:300px; height:300px; border-radius:50%;
+            background:rgba(255,255,255,0.03); bottom:-80px; left:-80px;
           }
           @media(max-width:768px){ .auth-left-panel{ display:none!important; } }
         `}</style>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{ width:44, height:44, background:"linear-gradient(135deg,#c9973a,#e8c278)", borderRadius:11, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.3rem", color:"#3b0a0a" }}>
+
+        {/* Logo */}
+        <div style={{ display:"flex", alignItems:"center", gap:12, position:"relative", zIndex:1 }}>
+          <div style={{ width:46, height:46, background:"rgba(255,255,255,0.1)", border:"1.5px solid rgba(255,255,255,0.15)", borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.4rem", color:"#7ab8f5" }}>
             <i className="bi bi-building"></i>
           </div>
           <div>
-            <div style={{ fontFamily:"Playfair Display,serif", fontSize:"1.55rem", fontWeight:800, color:"#fff" }}>PropManage</div>
-            <div style={{ fontSize:"0.65rem", color:"#e8c278", textTransform:"uppercase", letterSpacing:"0.5px" }}>PMS Platform</div>
+            <div style={{ fontFamily:"DM Sans,sans-serif", fontSize:"1.3rem", fontWeight:800, color:"#fff", letterSpacing:"-0.3px" }}>AUM Sol Corp</div>
+            <div style={{ fontSize:"0.62rem", color:"rgba(122,184,245,0.8)", textTransform:"uppercase", letterSpacing:"1px", fontWeight:500 }}>PMS Platform</div>
           </div>
         </div>
+
+        {/* Tagline */}
         <div style={{ position:"relative", zIndex:1 }}>
-          <h2 style={{ fontFamily:"Playfair Display,serif", fontSize:"2.1rem", fontWeight:800, color:"#fff", lineHeight:1.25, marginBottom:"1rem" }}>
-            Property Management <span style={{ color:"#e8c278" }}>Reimagined.</span>
+          <h2 style={{ fontFamily:"DM Sans,sans-serif", fontSize:"2rem", fontWeight:800, color:"#fff", lineHeight:1.25, marginBottom:"1rem" }}>
+            Property Management{" "}
+            <span style={{ color:"#7ab8f5" }}>Reimagined.</span>
           </h2>
-          <p style={{ color:"rgba(255,255,255,0.68)", fontSize:"0.95rem", lineHeight:1.7 }}>
+          <p style={{ color:"rgba(255,255,255,0.6)", fontSize:"0.93rem", lineHeight:1.75 }}>
             Run rent collection, maintenance, and accounting on autopilot — built for modern property managers.
           </p>
         </div>
-        <div style={{ display:"flex", flexDirection:"column", gap:"0.7rem", position:"relative", zIndex:1 }}>
+
+        {/* Feature chips */}
+        <div style={{ display:"flex", flexDirection:"column", gap:"0.65rem", position:"relative", zIndex:1 }}>
           {[
-            { icon:"bi-cash-coin",       text:"Online Rent Collection"     },
-            { icon:"bi-tools",           text:"Maintenance Tracking"        },
-            { icon:"bi-bar-chart-line",  text:"Real-time Financial Reports" },
-            { icon:"bi-people-fill",     text:"Tenant & Owner Portals"      },
+            { icon:"bi-cash-coin",      text:"Online Rent Collection"     },
+            { icon:"bi-tools",          text:"Maintenance Tracking"       },
+            { icon:"bi-bar-chart-line", text:"Real-time Financial Reports"},
+            { icon:"bi-people-fill",    text:"Tenant & Owner Portals"     },
           ].map(f => (
-            <div key={f.text} style={{ background:"rgba(255,255,255,0.07)", border:"1px solid rgba(201,151,58,0.25)", borderRadius:12, padding:"0.8rem 1rem", display:"flex", alignItems:"center", gap:"0.8rem", color:"rgba(255,255,255,0.9)", fontSize:"0.87rem", fontWeight:500 }}>
-              <i className={`bi ${f.icon}`} style={{ color:"#e8c278", fontSize:"1.05rem" }}></i>
+            <div key={f.text} style={{
+              background:"rgba(255,255,255,0.06)",
+              border:"1px solid rgba(122,184,245,0.2)",
+              borderRadius:10, padding:"0.75rem 1rem",
+              display:"flex", alignItems:"center", gap:"0.8rem",
+              color:"rgba(255,255,255,0.85)", fontSize:"0.87rem", fontWeight:500,
+            }}>
+              <i className={`bi ${f.icon}`} style={{ color:"#7ab8f5", fontSize:"1.05rem" }}></i>
               {f.text}
             </div>
           ))}

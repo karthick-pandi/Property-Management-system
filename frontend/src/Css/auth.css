@@ -7,23 +7,20 @@
 
 /* ── CSS Variables ── */
 :root {
-  --maroon-dark:   #3b0a0a;
-  --maroon-mid:    #6b1a1a;
-  --maroon-main:   #8b2020;
-    --maroon-dark:   #0d1b2a;
-    --maroon-mid:    #1a2f4a;
-    --maroon-main:   #1e3a5f;
-    --maroon-light:  #2563a8;
-    --maroon-accent: #3b82c4;
-    --gold:          #c9973a;
-    --gold-light:    #e8c278;
-    --cream:         #f0f4f8;
-    --cream-dark:    #e4eaf1;
-    --text-dark:     #0d1b2a;
-    --text-mid:      #2d4460;
-    --text-muted:    #6b84a0;
-    --border:        #d1dce8;
-    --input-bg:      #f5f8fb;
+  --maroon-dark:   #0d1b2a;
+  --maroon-mid:    #1a2f4a;
+  --maroon-main:   #1e3a5f;
+  --maroon-light:  #2563a8;
+  --maroon-accent: #3b82c4;
+  --gold:          #c9973a;
+  --gold-light:    #e8c278;
+  --cream:         #f0f4f8;
+  --cream-dark:    #e4eaf1;
+  --text-dark:     #0d1b2a;
+  --text-mid:      #2d4460;
+  --text-muted:    #6b84a0;
+  --border:        #d1dce8;
+  --input-bg:      #f5f8fb;
   --white:         #ffffff;
 }
 
@@ -177,7 +174,7 @@ body {
   padding: 2.6rem 2.3rem;
   width: 100%;
   max-width: 460px;
-  box-shadow: 0 6px 40px rgba(59, 10, 10, 0.10);
+  box-shadow: 0 6px 40px rgba(13, 27, 42, 0.10);
   border: 1px solid var(--border);
 }
 
