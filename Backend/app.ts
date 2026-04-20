@@ -6,6 +6,9 @@ import rentalRoutes from "./Routes/Rentalagreement.routes";
 import cancellationRoutes from "./Routes/RentalCancellation.routes";
 import leaseRoutes from "./Routes/LeaseAgreement.routes";
 import leaseCancellationRoutes from "./Routes/LeaseCancellation.routes";
+import customerRoutes from "./Routes/Customer.routes";
+import propertyRoutes from "./Routes/Property.routes";
+import dashboardRoutes from "./Routes/Dashboard.routes";
 import cors from "cors";  
 
 
@@ -20,6 +23,9 @@ app.use("/api/rental-agreements", rentalRoutes);
 app.use("/api/rental-cancellations", cancellationRoutes);
 app.use("/api/lease-agreements", leaseRoutes);
 app.use("/api/lease-cancellations", leaseCancellationRoutes);
+app.use("/api/customers", customerRoutes);
+app.use("/api/properties", propertyRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 AppDataSource.initialize()
   .then(() => {

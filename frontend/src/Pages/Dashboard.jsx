@@ -1,20 +1,8 @@
 // Pages/Dashboard.jsx
 import "../Css/Global.css";
 
-const stats = [
-  { label: "Total Properties", value: "124",  icon: "bi-building-fill",   type: "maroon"  },
-  { label: "Active Tenants",   value: "89",   icon: "bi-people-fill",     type: "gold"    },
-  { label: "Open Maintenance", value: "12",   icon: "bi-tools",           type: "success" },
-  { label: "Pending Invoices", value: "₹2.4L", icon: "bi-receipt-cutoff", type: "info"    },
-];
-
-const recentActivity = [
-  { type: "Maintenance", desc: "AC repair – Apt 4B",     status: "Open",      date: "Today" },
-  { type: "Invoice",     desc: "March rent – Block C",   status: "Paid",      date: "Yesterday" },
-  { type: "Lease",       desc: "New lease – John Smith", status: "Active",    date: "2 days ago" },
-  { type: "Vendor",      desc: "RK Electricals quote",   status: "Pending",   date: "3 days ago" },
-  { type: "Leave",       desc: "Ravi Kumar – 3 days",    status: "Approved",  date: "4 days ago" },
-];
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const statusColor = {
   Open: "warning", Paid: "success", Active: "success",
@@ -22,26 +10,55 @@ const statusColor = {
 };
 
 export default function Dashboard() {
+  const [stats, setStats] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get("http://localhost:5000/api/dashboard");
+      setStats(res.data.stats || []);
+      setRecentActivity(res.data.recentActivity || []);
+    } catch (err) {
+      setError("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="page-header">
         <h2>Welcome back 👋</h2>
         <p>Here's what's happening in your properties today.</p>
+        {error && <div style={{ color: "var(--danger)", marginBottom: 10 }}>{error}</div>}
       </div>
 
       {/* Stats */}
       <div className="stat-grid">
-        {stats.map((s) => (
-          <div className="stat-card" key={s.label}>
-            <div className={`stat-icon ${s.type}`}>
-              <i className={`bi ${s.icon}`}></i>
+        {loading ? (
+          <div>Loading...</div>
+        ) : stats.length > 0 ? (
+          stats.map((s) => (
+            <div className="stat-card" key={s.label}>
+              <div className={`stat-icon ${s.type}`}>
+                <i className={`bi ${s.icon}`}></i>
+              </div>
+              <div>
+                <div className="stat-label">{s.label}</div>
+                <div className="stat-value">{s.value}</div>
+              </div>
             </div>
-            <div>
-              <div className="stat-label">{s.label}</div>
-              <div className="stat-value">{s.value}</div>
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+            <div style={{ padding: 20, color: "var(--text-muted)" }}>No dashboard stats available yet.</div>
+          )}
       </div>
 
       {/* Recent activity */}
@@ -61,7 +78,9 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {recentActivity.map((a, i) => (
+              {loading ? (
+                <tr><td colSpan={4}>Loading...</td></tr>
+              ) : recentActivity.map((a, i) => (
                 <tr key={i}>
                   <td><span className="badge-pms neutral">{a.type}</span></td>
                   <td>{a.desc}</td>
@@ -69,6 +88,9 @@ export default function Dashboard() {
                   <td style={{ color:"var(--text-muted)", fontSize:"0.82rem" }}>{a.date}</td>
                 </tr>
               ))}
+              {!loading && recentActivity.length === 0 && (
+                 <tr><td colSpan={4} style={{ textAlign: "center", color: "var(--text-muted)" }}>No recent activity available.</td></tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -1,34 +1,51 @@
 // Pages/Customers.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "../Css/Global.css";
 
-const mockCustomers = [
-  { id:"C001", name:"Rajesh Kumar",   email:"rajesh@email.com", phone:"9876543210", type:"Owner",   status:"Active"   },
-  { id:"C002", name:"Priya Sharma",   email:"priya@email.com",  phone:"9123456789", type:"Tenant",  status:"Active"   },
-  { id:"C003", name:"Amit Patel",     email:"amit@email.com",   phone:"9988776655", type:"Owner",   status:"Inactive" },
-  { id:"C004", name:"Sunita Reddy",   email:"sunita@email.com", phone:"9345678901", type:"Tenant",  status:"Active"   },
-  { id:"C005", name:"Venkat Naidu",   email:"venkat@email.com", phone:"9765432109", type:"Company", status:"Active"   },
-];
 
-const empty = { name:"", email:"", phone:"", type:"Owner", address:"", city:"", country:"India", status:"Active" };
+
+const empty = { name: "", email: "", phone: "", company: "", address: "", status: "Active" };
 
 export default function Customers() {
-  const [customers, setCustomers] = useState(mockCustomers);
-  const [showForm, setShowForm]   = useState(false);
-  const [form, setForm]           = useState(empty);
-  const [search, setSearch]       = useState("");
+  const [customers, setCustomers] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(empty);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get("http://localhost:5000/api/customers");
+      setCustomers(res.data);
+    } catch (err) {
+      setError("Failed to load customers");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = customers.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase())
+    (c.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    (c.email || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleAdd = (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
-    const newC = { ...form, id: "C" + String(customers.length + 1).padStart(3,"0") };
-    setCustomers([...customers, newC]);
-    setForm(empty);
-    setShowForm(false);
+    try {
+      await axios.post("http://localhost:5000/api/customers", form);
+      setForm(empty);
+      setShowForm(false);
+      fetchCustomers();
+    } catch (err) {
+      setError("Failed to add customer");
+    }
   };
 
   return (
@@ -36,6 +53,7 @@ export default function Customers() {
       <div className="page-header">
         <h2>Customer Details</h2>
         <p>Manage all property owners, tenants, and companies.</p>
+        {error && <div style={{ color: "var(--danger)", marginBottom: 10 }}>{error}</div>}
       </div>
 
       {/* Toolbar */}
@@ -61,13 +79,7 @@ export default function Customers() {
               <div className="field-group"><label>Full Name *</label><input required value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder="Rajesh Kumar" /></div>
               <div className="field-group"><label>Email *</label><input required type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="rajesh@email.com" /></div>
               <div className="field-group"><label>Phone</label><input value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} placeholder="9876543210" /></div>
-              <div className="field-group"><label>Customer Type</label>
-                <select value={form.type} onChange={e => setForm({...form, type:e.target.value})}>
-                  <option>Owner</option><option>Tenant</option><option>Company</option>
-                </select>
-              </div>
-              <div className="field-group"><label>City</label><input value={form.city} onChange={e => setForm({...form, city:e.target.value})} placeholder="Chennai" /></div>
-              <div className="field-group"><label>Country</label><input value={form.country} onChange={e => setForm({...form, country:e.target.value})} /></div>
+              <div className="field-group"><label>Company</label><input value={form.company} onChange={e => setForm({...form, company:e.target.value})} placeholder="Company name" /></div>
               <div className="field-group form-full"><label>Address</label><textarea value={form.address} onChange={e => setForm({...form, address:e.target.value})} placeholder="Full address..." /></div>
             </div>
             <div style={{ display:"flex", gap:"0.75rem" }}>

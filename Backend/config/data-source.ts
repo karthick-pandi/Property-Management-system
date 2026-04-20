@@ -5,6 +5,8 @@ import { RentalAgreement } from "../Entity/Rentalagreement";
 import { RentalCancellation } from "../Entity/RentalCancellation";
 import { LeaseCancellation } from "../Entity/LeaseCancellation";
 import { LeaseAgreement } from "../Entity/LeaseAgreement";
+import { Customer } from "../Entity/Customer";
+import { Property } from "../Entity/Property";
 
 export const AppDataSource = new DataSource({
   type:        "mysql",
@@ -15,7 +17,7 @@ export const AppDataSource = new DataSource({
   database:    "pms_db",
   synchronize: true,
   logging:     false,
-  entities:    [User, RentalAgreement, RentalCancellation, LeaseAgreement, LeaseCancellation],
+  entities:    [User, RentalAgreement, RentalCancellation, LeaseAgreement, LeaseCancellation, Customer, Property],
 
   extra: {
     connectionLimit: 10,

@@ -1,29 +1,47 @@
 // Pages/Properties.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "../Css/Global.css";
-
-const mockProps = [
-  { id:"P001", name:"Sunrise Apartments",  type:"Residential", units:24, city:"Chennai",   owner:"Rajesh Kumar", status:"Occupied"  },
-  { id:"P002", name:"Tech Park Plaza",     type:"Commercial",  units:8,  city:"Bangalore", owner:"Venkat Naidu", status:"Partial"   },
-  { id:"P003", name:"Green Villa Estate",  type:"Villa",       units:6,  city:"Hyderabad", owner:"Amit Patel",   status:"Vacant"    },
-  { id:"P004", name:"Royal Residency",     type:"Residential", units:36, city:"Mumbai",    owner:"Rajesh Kumar", status:"Occupied"  },
-  { id:"P005", name:"City Commercial Hub", type:"Commercial",  units:12, city:"Chennai",   owner:"Venkat Naidu", status:"Partial"   },
-];
 
 const empty = { name:"", type:"Residential", units:"", city:"", address:"", owner:"", status:"Vacant" };
 
 export default function Properties() {
-  const [props, setProps]   = useState(mockProps);
+  const [props, setProps]   = useState([]);
   const [showForm, setShow] = useState(false);
   const [form, setForm]     = useState(empty);
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get("http://localhost:5000/api/properties");
+      setProps(res.data);
+    } catch (err) {
+      setError("Failed to load properties");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const filtered = filter === "All" ? props : props.filter(p => p.status === filter);
 
-  const handleAdd = (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
-    setProps([...props, { ...form, id:"P" + String(props.length+1).padStart(3,"0") }]);
-    setForm(empty); setShow(false);
+    try {
+      await axios.post("http://localhost:5000/api/properties", form);
+      setForm(empty);
+      setShow(false);
+      fetchProperties();
+    } catch (err) {
+      setError("Failed to add property");
+    }
   };
 
   const statusColor = { Occupied:"success", Partial:"warning", Vacant:"danger" };
@@ -34,6 +52,7 @@ export default function Properties() {
       <div className="page-header">
         <h2>Property Details</h2>
         <p>Manage villas, apartments, commercial spaces, and more.</p>
+        {error && <div style={{ color: "var(--danger)", marginBottom: 10 }}>{error}</div>}
       </div>
 
       {/* Stats */}
