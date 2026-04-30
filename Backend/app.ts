@@ -9,9 +9,8 @@ import leaseCancellationRoutes from "./Routes/LeaseCancellation.routes";
 import customerRoutes from "./Routes/Customer.routes";
 import propertyRoutes from "./Routes/Property.routes";
 import dashboardRoutes from "./Routes/Dashboard.routes";
-import cors from "cors";  
-
-
+import cors from "cors";
+import maintenanceRoutes from "./Routes/Maintenance.routes";
 
 const app = express();
 app.use(express.json());
@@ -26,6 +25,7 @@ app.use("/api/lease-cancellations", leaseCancellationRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/maintenance", maintenanceRoutes);
 
 AppDataSource.initialize()
   .then(() => {
