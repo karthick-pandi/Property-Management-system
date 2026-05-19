@@ -16,6 +16,49 @@ function getStrength(pw) {
 const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"];
 const strengthColor = ["", "#c0392b", "#c9973a", "#7a6020", "#4a7c2f"];
 
+const styles = {
+  page: {
+    background: "rgb(232, 226, 213)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxSizing: "border-box",
+    overflowX: "hidden",
+    padding: "24px 16px",
+    fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+  },
+  card: {
+    width: "100%",
+    maxWidth: "520px",
+    borderRadius: "14px",
+    overflow: "hidden",
+  },
+
+  /* HEADER */
+  header: {
+    background: "#0d1b2a",
+    padding: "38px 40px 34px",
+    textAlign: "center",
+    position: "relative",
+  },
+  headerTitle: {
+    fontFamily: "Georgia, 'Times New Roman', serif",
+    fontSize: "29px",
+    fontWeight: "700",
+    color: "#ffffff",
+    letterSpacing: "-0.01em",
+    marginBottom: "8px",
+  },
+  headerSub: {
+    fontSize: "10.5px",
+    fontWeight: "600",
+    letterSpacing: "0.26em",
+    textTransform: "uppercase",
+    color: "#c9a961",
+    fontStyle: "italic",
+  }
+}
+
 export default function SignupPage({ onSwitch }) {
   const [form, setForm] = useState({
     firstName: "",
@@ -109,6 +152,18 @@ export default function SignupPage({ onSwitch }) {
   /* ── Signup Form ── */
   return (
     <div className="auth-card">
+        {/* <div style={styles.header}>
+            <div style={styles.headerTitle}>AUM Sol Corp</div>
+            <div style={styles.headerSub}>Property Management System</div>
+          </div> */}
+      <div className="auth-tab-bar">
+        <button type="button" className="auth-tab-button" onClick={onSwitch}>
+          Login
+        </button>
+        <button type="button" className="auth-tab-button active">
+          Sign Up
+        </button>
+      </div>
       <h3>Create your account</h3>
       <p className="sub">Start your 14-day free trial — no credit card required.</p>
 

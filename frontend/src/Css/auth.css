@@ -178,6 +178,33 @@ body {
   border: 1px solid var(--border);
 }
 
+.auth-tab-bar {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  background: #f4efe6;
+  border: 1px solid #e5dfda;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.auth-tab-button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 0.9rem 0;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.auth-tab-button.active,
+.auth-tab-button:hover {
+  background: var(--white);
+  color: var(--text-dark);
+}
+
 .auth-card h3 {
   font-family: 'Playfair Display', serif;
   font-size: 1.75rem;

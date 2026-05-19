@@ -37,13 +37,13 @@ export const validateSignup = (data: SignupDTO): string | null => {
 };
 
 export const validateLogin = (data: LoginDTO): string | null => {
-  const { email, password } = data;
+  const { identifier, password } = data;
 
-  if (!email || email.trim() === "")
-    return "Email is required";
+  if (!identifier || identifier.trim() === "")
+    return "User ID or email is required";
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email))
+  if (identifier.includes("@") && !emailRegex.test(identifier))
     return "Invalid email format";
 
   if (!password || password.trim() === "")

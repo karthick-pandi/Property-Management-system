@@ -46,10 +46,15 @@ export const registerUser = async (data: SignupDTO) => {
    LOGIN
 ───────────────────────────────────────── */
 export const loginUser = async (data: LoginDTO) => {
-  const { email, password } = data;
+  const { identifier, password } = data;
 
-  // Find user
-  const user = await userRepo.findOne({ where: { email } });
+  // Find user by email or userId
+  const user = await userRepo.findOne({
+    where: [
+      { email: identifier },
+      { userId: identifier },
+    ],
+  });
   if (!user) {
     throw new Error("Invalid email or password");
   }
